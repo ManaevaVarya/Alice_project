@@ -93,7 +93,7 @@ def handle_dialog(res, req):
                     sessionStorage[character_id]['game_started'] = True
                     # номер попытки, чтобы показывать фото по порядку
                     sessionStorage[character_id]['attempt'] = 1
-                    # функция, которая выбирает город для игры и показывает фото
+                    # функция, которая выбирает персонажа для игры и показывает фото
                     play_game(res, req)
             elif 'Нет.' in req['request']['nlu']['tokens']:
                 res['response']['text'] = 'Ну и ладно, как-нибудь в другой раз!'
@@ -123,7 +123,7 @@ def play_game(res, req):
         # выбираем его до тех пор пока не выберем персонажа, которого нет в sessionStorage[user_id]['guessed_characters']
         while character in sessionStorage[user_id]['guessed_characters']:
             character = random.choice(list(characters))
-        # записываем город в информацию о пользователе
+        # записываем персонажа в информацию о пользователе
         sessionStorage[user_id]['character'] = character
         # добавляем в ответ картинку
         res['response']['card'] = {}
@@ -154,7 +154,7 @@ def play_game(res, req):
                 sessionStorage[user_id]['guessed_characters'].append(character)
                 return
             elif attempt == 3:
-                # иначе показываем следующую картинку
+                # иначе даём ещё попытку
                 res['response']['card'] = {}
                 res['response']['card']['title'] = 'Неверно. У тебя осталась одна попытка. Хочешь получить подсказку?'
                 res['response']['buttons'] = [
@@ -169,13 +169,12 @@ def play_game(res, req):
                 ]
                 if "Хочу!" in res['request']['nlu']['tokens']:
                     res['response']['card'] = {}
-                    res['response']['card']['type'] = 'BigImage'
                     res['response']['card']['text'] = 'Держи:'
                     res['response']['card']['text'] = characters[character][attempt - 1]
                 else:
                     res['response']['text'] = 'Хорошо, я верю в тебя, не подведи!'
             else:
-                # иначе показываем следующую картинку
+                # иначе ддаём шанс получить подсказку
                 res['response']['card'] = {}
                 res['response']['card']['title'] = 'Неправильно. Хочешь, дам подсказку?'
                 res['response']['buttons'] = [
@@ -190,9 +189,8 @@ def play_game(res, req):
                 ]
                 if "Да, пожалуйста!" in res['request']['nlu']['tokens']:
                     res['response']['card'] = {}
-                    res['response']['card']['type'] = 'BigImage'
                     res['response']['card']['title'] = 'Это должно быть полезно:'
-                    res['response']['card']['image_id'] = characters[character][attempt - 1]
+                    res['response']['card']['text'] = characters[character][attempt - 1]
                 else:
                     res['response']['text'] = 'Хорошо, у тебя есть ещё две попытки!'
     # увеличиваем номер попытки для следующего шага
